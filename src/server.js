@@ -14,13 +14,19 @@ const handleListen = () => console.log("Listening on http://localhost:3000");
 const server = http.createServer(app);
 const wss = new WebSocket.Server({ server });
 
+const onSocketClose = () => {
+  console.log("Disconnected from the Browser ❌");
+};
+
+const onSocketMessage = (message) => {
+  console.log("Message from Browser: ", message.toString());
+};
+
 wss.on("connection", (socket) => {
   console.log("Connected to Browser ✅");
-  socket.on("close", () => console.log("Disconnected from the Browser ❌"));
+  socket.on("close", onSocketClose);
   socket.send("Hello!! from server");
-  socket.on("message", (message) => {
-    console.log("Message from Browser: ", message.toString());
-  });
+  socket.on("message", onSocketMessage);
 });
 
 server.listen(3000, handleListen);

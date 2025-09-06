@@ -1,17 +1,19 @@
 const socket = new WebSocket(`ws://${window.location.host}`);
 
-socket.addEventListener("open", () => {
+const handleOpen = () => {
   console.log("Connected to server ✅");
+};
 
-  setTimeout(() => {
-    socket.send("Hello!! from browser");
-  }, 10000);
-});
-
-socket.addEventListener("message", (message) => {
-  console.log("Message from server: ", message.data);
-});
-
-socket.addEventListener("close", () => {
+const handleClose = () => {
   console.log("Disconnected from server ❌");
-});
+};
+
+const handleMessage = (message) => {
+  console.log("Message from server: ", message.data);
+};
+
+socket.addEventListener("open", handleOpen);
+
+socket.addEventListener("message", handleMessage);
+
+socket.addEventListener("close", handleClose);

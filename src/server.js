@@ -1,5 +1,5 @@
 import http from "http";
-import WebSocket from "ws";
+import SocketIO from "socket.io";
 import express from "express";
 
 const app = express();
@@ -11,33 +11,38 @@ app.get("/", (req, res) => res.render("home"));
 
 const handleListen = () => console.log("Listening on http://localhost:3000");
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
+const httpServer = http.createServer(app);
+const wsServer = SocketIO(httpServer);
 
-const onSocketClose = () => {
-  console.log("Disconnected from the Browser ❌");
-};
+httpServer.listen(3000, handleListen);
 
-const sockets = [];
-
-wss.on("connection", (socket) => {
-  sockets.push(socket);
-  socket.on("close", onSocketClose);
-  socket.send("Hello!! from server");
-  socket.on("message", (msg) => {
-    const message = JSON.parse(msg);
-
-    switch (message.type) {
-      case "new_message":
-        sockets.forEach((aSocket) =>
-          aSocket.send(`${socket.nickname || "Anonymous"}: ${message.payload}`)
-        );
-        break;
-      case "nickname":
-        socket["nickname"] = message.payload;
-        break;
-    }
-  });
+// Socket.IO
+wsServer.on("connection", (socket) => {
+  console.log("Connected to Browser ✅", socket);
 });
 
-server.listen(3000, handleListen);
+// WebSocket Server
+// const wss = new WebSocket.Server({ server });
+// const onSocketClose = () => {
+//   console.log("Disconnected from the Browser ❌");
+// };
+// const sockets = [];
+// wss.on("connection", (socket) => {
+//   sockets.push(socket);
+//   socket.on("close", onSocketClose);
+//   socket.send("Hello!! from server");
+//   socket.on("message", (msg) => {
+//     const message = JSON.parse(msg);
+
+//     switch (message.type) {
+//       case "new_message":
+//         sockets.forEach((aSocket) =>
+//           aSocket.send(`${socket.nickname || "Anonymous"}: ${message.payload}`)
+//         );
+//         break;
+//       case "nickname":
+//         socket["nickname"] = message.payload;
+//         break;
+//     }
+//   });
+// });

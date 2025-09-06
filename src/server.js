@@ -18,15 +18,15 @@ const onSocketClose = () => {
   console.log("Disconnected from the Browser ❌");
 };
 
-const onSocketMessage = (message) => {
-  console.log("Message from Browser: ", message.toString());
-};
+const sockets = [];
 
 wss.on("connection", (socket) => {
-  console.log("Connected to Browser ✅");
+  sockets.push(socket);
   socket.on("close", onSocketClose);
   socket.send("Hello!! from server");
-  socket.on("message", onSocketMessage);
+  socket.on("message", (message) => {
+    sockets.forEach((aSocket) => aSocket.send(message.toString()));
+  });
 });
 
 server.listen(3000, handleListen);

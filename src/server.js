@@ -15,6 +15,21 @@ const wsServer = SocketIO(httpServer);
 const handleListen = () => console.log("Listening on http://localhost:3000");
 httpServer.listen(3000, handleListen);
 
+wsServer.on("connection", (socket) => {
+  socket.on("join_room", (roomName) => {
+    socket.join(roomName);
+    socket.to(roomName).emit("welcome");
+  });
+
+  socket.on("offer", (offer, roomName) => {
+    socket.to(roomName).emit("offer", offer);
+  });
+
+  socket.on("answer", (answer, roomName) => {
+    socket.to(roomName).emit("answer", answer);
+  });
+});
+
 // Socket.IO
 // wsServer.on("connection", (socket) => {
 //   socket["nickname"] = socket.nickname || "익명";

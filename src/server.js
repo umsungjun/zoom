@@ -18,7 +18,19 @@ httpServer.listen(3000, handleListen);
 
 // Socket.IO
 wsServer.on("connection", (socket) => {
-  console.log("Connected to Browser ✅", socket);
+  console.log("Connected to Browser ✅");
+
+  socket.on("enter_room", (roomName, done) => {
+    socket.join(roomName);
+    done();
+    socket.to(roomName).emit("welcome");
+  });
+
+  socket.on("disconnecting", () => {
+    socket.rooms.forEach((room) => {
+      socket.to(room).emit("bye");
+    });
+  });
 });
 
 // WebSocket Server

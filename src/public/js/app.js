@@ -122,23 +122,47 @@ welcomeForm.addEventListener("submit", handleWelcomeSubmit);
 socket.on("welcome", async () => {
   const offer = await myPeerConnection.createOffer();
   myPeerConnection.setLocalDescription(offer);
+  console.log("1. sent the offer");
   socket.emit("offer", offer, roomName);
 });
 socket.on("answer", (answer) => {
+  console.log("4. received the answer");
   myPeerConnection.setRemoteDescription(answer);
 });
 
 // Peer B
 socket.on("offer", async (offer) => {
+  console.log("2. received the offer");
   myPeerConnection.setRemoteDescription(offer);
   const answer = await myPeerConnection.createAnswer();
   myPeerConnection.setLocalDescription(answer);
+  console.log("3. sent the answer");
   socket.emit("answer", answer, roomName);
 });
 
+// Both Peers
+socket.on("ice", (ice) => {
+  console.log("6. received candidate");
+  myPeerConnection.addIceCandidate(ice);
+});
+
 // RTC code
+const handleIce = (data) => {
+  console.log("5. sent candidate");
+  socket.emit("ice", data.candidate, roomName);
+};
+
+const handleAddStream = (data) => {
+  console.log("Peer's Stream", data.stream);
+  console.log("My Stream", myStream);
+  const peersStream = document.getElementById("peerFace");
+  peersStream.srcObject = data.stream;
+};
+
 const makeConnection = () => {
   myPeerConnection = new RTCPeerConnection();
+  myPeerConnection.addEventListener("icecandidate", handleIce);
+  myPeerConnection.addEventListener("addstream", handleAddStream);
   myStream
     .getTracks()
     .forEach((track) => myPeerConnection.addTrack(track, myStream));

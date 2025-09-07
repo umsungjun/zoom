@@ -18,23 +18,28 @@ httpServer.listen(3000, handleListen);
 
 // Socket.IO
 wsServer.on("connection", (socket) => {
+  socket["nickname"] = socket.nickname || "익명";
   console.log("Connected to Browser ✅");
 
   socket.on("enter_room", (roomName, done) => {
     socket.join(roomName);
     done();
-    socket.to(roomName).emit("welcome");
+    socket.to(roomName).emit("welcome", socket.nickname);
   });
 
   socket.on("disconnecting", () => {
     socket.rooms.forEach((room) => {
-      socket.to(room).emit("bye");
+      socket.to(room).emit("bye", socket.nickname);
     });
   });
 
   socket.on("new_message", (msg, room, done) => {
-    socket.to(room).emit("new_message", msg);
+    socket.to(room).emit("new_message", `${socket.nickname}: ${msg}`);
     done();
+  });
+
+  socket.on("nickname", (nickname) => {
+    socket["nickname"] = nickname;
   });
 });
 
